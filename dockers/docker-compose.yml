@@ -1,0 +1,51 @@
+version: "3.8"
+name: "sailmaker"
+services:
+  rabbitmq:
+    image: rabbitmq:3.9.13-management-alpine
+    container_name: sailmaker_rabbitmq
+    restart: always
+    environment:
+      - "RABBITMQ_DEFAULT_PASS=rguest"
+      - "RABBITMQ_DEFAULT_USER=rguest"
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - sailmaker_rabbitmq_net
+
+  mongodb:
+    image: mongo:latest
+    container_name: sailmaker_mongodb
+    environment:
+      - "MONGO_INITDB_ROOT_USERNAME=sailmaker"
+      - "MONGO_INITDB_ROOT_PASSWORD=sailmaker"
+    ports:
+      - 27017:27017
+    volumes:
+      - sailmaker_monogdb_volume:/data/db
+    networks:
+      - sailmaker_monogdb_net
+
+  mongo-express:
+    image: mongo-express
+    depends_on:
+      - sailmaker_mongodb
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: rootpassword
+      ME_CONFIG_MONGODB_URL: mongodb://sailmaker:sailmaker@mongodb:27017/
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: true
+    networks:
+      - sailmaker_monogdb_net
+
+networks:
+  sailmaker_rabbitmq_net:
+    driver: bridge
+  sailmaker_monogdb_net:
+    driver: bridge
+
+volumes:
+  sailmaker_monogdb_volume:
