@@ -46,7 +46,7 @@ router.post('/', async (req, res) => {
 router.post('/buy', async (req, res) => {
   const { productIds } = req.body;
   const products = await Product.find({ _id: { $in: productIds } });
-
+  console.log(products);
   // send order to queue
   channel.sendToQueue(
     ORDER_QUEUE_NAME,
@@ -57,7 +57,7 @@ router.post('/buy', async (req, res) => {
 
   // consume previously placed order from rabbitmq & acknowledge the transaction
   channel.consume(PRODUCT_QUEUE_NAME, (data) => {
-    console.log('Consumed from product-service-queue');
+    console.log(`Consumed from ${ORDER_QUEUE_NAME}`, data.content.toString());
     order = JSON.parse(data.content.toString());
     channel.ack(data);
   });
