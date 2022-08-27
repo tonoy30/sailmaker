@@ -1,12 +1,11 @@
 import { Channel } from 'amqplib';
 import { Router } from 'express';
 import { connectToRabbitMQ } from 'libs/amqp/amqp';
+import { ORDER_QUEUE_NAME, PRODUCT_QUEUE_NAME } from 'libs/amqp/queue';
 import { createOrder } from 'libs/models/order';
 import { environment } from '../environments/environment';
-const router = Router();
 
-const PRODUCT_QUEUE_NAME = 'product-service-queue';
-const ORDER_QUEUE_NAME = 'order-service-queue';
+const router = Router();
 
 let channel: Channel;
 
@@ -29,7 +28,7 @@ connectToRabbitMQ(environment.rabbitMqConnectionString, ORDER_QUEUE_NAME)
   });
 
 router.get('/', (req, res) => {
-  res.send('products home page');
+  res.send('orders home page');
 });
 
 export { router as orderRouters };

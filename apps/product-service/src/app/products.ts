@@ -1,12 +1,10 @@
 import { Channel } from 'amqplib';
 import { Router } from 'express';
 import { connectToRabbitMQ } from 'libs/amqp/amqp';
+import { ORDER_QUEUE_NAME, PRODUCT_QUEUE_NAME } from 'libs/amqp/queue';
 import { Product } from 'libs/models/product';
 import { environment } from '../environments/environment';
 const router = Router();
-
-const PRODUCT_QUEUE_NAME = 'product-service-queue';
-const ORDER_QUEUE_NAME = 'order-service-queue';
 
 let channel: Channel;
 
@@ -53,19 +51,17 @@ router.post('/buy', async (req, res) => {
     Buffer.from(JSON.stringify({ products }))
   );
 
-  let order;
-
   // consume previously placed order from rabbitmq & acknowledge the transaction
   channel.consume(PRODUCT_QUEUE_NAME, (data) => {
-    console.log(`Consumed from ${ORDER_QUEUE_NAME}`, data.content.toString());
-    order = JSON.parse(data.content.toString());
+    console.log(`Consumed from ${ORDER_QUEUE_NAME}`);
+    const order = JSON.parse(data.content.toString());
+    console.log(order);
     channel.ack(data);
   });
 
   // Return a success message
   return res.status(201).json({
     message: 'Order placed successfully',
-    order,
   });
 });
 
